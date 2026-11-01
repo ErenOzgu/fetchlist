@@ -1,0 +1,18 @@
+# One pull request a month per ecosystem. The pins in the workflows are commit SHAs; Dependabot moves them and keeps the
+# version in the comment next to them.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      python:
+        patterns: ["*"]

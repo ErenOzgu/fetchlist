@@ -1,0 +1,13 @@
+include:
+  - remote: https://example.com/ci/templates/base.yml
+  - project: platform/pipelines
+    ref: main
+    file: /build.yml
+
+build:
+  image: maven:3.9-eclipse-temurin-21
+  services:
+    - postgres:16
+  script:
+    - npm install -g typescript@5.6.2
+    - mvn -B verify

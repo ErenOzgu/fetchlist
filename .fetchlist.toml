@@ -1,0 +1,2 @@
+# fetchlist checks itself in CI. The examples are inputs that are unpinned on purpose, and the tests build their own.
+exclude = ["examples/**", "tests/fixtures/**"]

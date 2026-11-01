@@ -1,0 +1,20 @@
+name: ci
+on: [push]
+env:
+  TOOLBOX: ghcr.io/example/toolbox@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+      - run: pip install ruff pytest==8.3.3
+      - run: docker run --rm "${TOOLBOX}" lint
+      - run: docker run --rm alpine:3.20 true
+      - name: kubeconform
+        run: |
+          curl -fsSLo kc.tgz https://example.com/kubeconform/v0.6.7/kc.tgz
+          echo "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc  kc.tgz" | sha256sum -c -
+          tar -xzf kc.tgz
+      - name: installer
+        run: curl -fsSL https://get.example.com/install.sh | sh

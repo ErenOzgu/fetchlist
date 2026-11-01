@@ -1,0 +1,54 @@
+.github/workflows/ci.yml
+     9  action  UNPINNED   actions/checkout@v4
+                             the tag v4 can be moved to another commit
+    10  action  PINNED     actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+    11  package PINNED     pytest==8.3.3
+    11  package UNPINNED   ruff
+                             any version matches
+    12  image   PINNED     ghcr.io/example/toolbox@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    13  image   UNPINNED   alpine:3.20
+                             allowed: a throw-away container for a smoke test; nothing it downloads is kept
+    16  url     PINNED     https://example.com/kubeconform/v0.6.7/kc.tgz
+    20  url     UNPINNED   https://get.example.com/install.sh
+                             piped into a shell, so nothing can check what runs
+.gitlab-ci.yml
+     2  include UNPINNED   https://example.com/ci/templates/base.yml
+                             the file at this URL can change
+     3  include UNPINNED   platform/pipelines@main
+                             main is a branch or tag and can move
+     8  image   UNPINNED   maven:3.9-eclipse-temurin-21
+                             the tag :3.9-eclipse-temurin-21 can be pushed again to different content
+    10  image   UNPINNED   postgres:16
+                             the tag :16 can be pushed again to different content
+    12  package PINNED     typescript@5.6.2
+Dockerfile
+     1  image   UNPINNED   golang:1.23
+                             the tag :1.23 can be pushed again to different content
+     2  package UNPINNED   golang.org/x/tools/cmd/goimports@latest
+                             @latest is not a release version
+     3  url     UNPINNED   https://example.com/tools/lint-1.4.0.tar.gz
+                             nothing in the same step checks what was downloaded
+     5  image   PINNED     python:3.12-slim@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+     7  image   UNPINNED   ghcr.io/example/helper:2.1
+                             the tag :2.1 can be pushed again to different content
+     8  url     UNPINNED   https://example.com/data/dataset.csv
+                             ADD from a URL without --checksum
+     9  package PINNED     flask==3.0.3
+     9  package UNPINNED   gunicorn
+                             any version matches
+requirements.txt
+     1  package PINNED     flask==3.0.3
+     2  package UNPINNED   requests>=2.31
+                             '>=2.31' is a range, not one version
+     3  package UNPINNED   gunicorn
+                             any version matches
+scripts/install.sh
+     5  url     UNPINNED   https://example.com/releases/tool-1.9.2.tar.gz
+                             nothing in the same step checks what was downloaded
+service/pom.xml
+    10  package PINNED     org.slf4j:slf4j-api:2.0.16
+    15  package UNPINNED   com.example:internal-lib:[1.0,2.0)
+                             [1.0,2.0) is a range, not one version
+    22  package UNPINNED   org.apache.maven.plugins:maven-jar-plugin
+                             no version here and none in pluginManagement; Maven picks one, unless a parent pom sets it
+28 fetches in 6 files: 9 pinned, 19 unpinned (1 allowed)

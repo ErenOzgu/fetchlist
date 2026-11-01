@@ -1,0 +1,9 @@
+docker.io
+example.com
+get.example.com
+ghcr.io
+github.com
+proxy.golang.org
+pypi.org
+registry.npmjs.org
+repo.maven.apache.org
