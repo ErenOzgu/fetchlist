@@ -121,12 +121,38 @@ def test_a_command_in_a_comment_is_not_a_fetch():
 
 
 def test_compose_images():
-    text = f"services:\n  web:\n    image: nginx:1.27\n    build: .\n  db:\n    image: 'postgres@sha256:{HASH}'\n"
+    text = f"services:\n  web:\n    image: nginx:1.27\n  db:\n    image: 'postgres@sha256:{HASH}'\n"
     found = scan_compose(text, "compose.yml")
     assert [(f.ref, f.status) for f in found] == [
         ("nginx:1.27", "unpinned"),
         (f"postgres@sha256:{HASH}", "pinned"),
     ]
+
+
+def compose_refs(text: str) -> list[str]:
+    return [f.ref for f in scan_compose(text, "compose.yml")]
+
+
+def test_a_compose_image_that_is_built_here_is_not_a_download():
+    assert compose_refs("services:\n  web:\n    image: app:local\n    build: .\n") == []
+    assert compose_refs("services:\n  web:\n    build: .\n    image: app:local\n") == []
+    long = "services:\n  web:\n    build:\n      context: .\n      args:\n        a: b\n\n    # name\n    image: app:local\n"
+    assert compose_refs(long) == []
+    assert (
+        compose_refs("services:\n  web:\n    build: .\n# a comment at column 0\n    image: app:local\n") == []
+    )
+
+
+def test_a_build_in_another_service_does_not_excuse_an_image():
+    text = "services:\n  web:\n    build: .\n    image: app:local\n  db:\n    image: postgres:16\n  cache:\n    image: redis:7\n"
+    assert compose_refs(text) == ["postgres:16", "redis:7"]
+    text = "services:\n  db:\n    image: postgres:16\n  web:\n    build: .\n"
+    assert compose_refs(text) == ["postgres:16"]
+
+
+def test_a_nested_build_key_is_not_the_services_build():
+    text = "services:\n  web:\n    image: app:1\n    labels:\n      build: yes\n"
+    assert compose_refs(text) == ["app:1"]
 
 
 def test_a_ref_must_be_a_full_commit_to_count():

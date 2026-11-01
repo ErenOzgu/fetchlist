@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.1.1 - 2026-11-01
+
+### Fixed
+
+- A Compose service that has `build:` as well as `image:` is no longer reported: the image is built there, `image` is
+  only the name it gets. Found by running the tool on 24 real repositories (3 tests, and the new lines were
+  mutation-checked).
+
 ## 0.1.0 - 2026-11-01
 
 First release.

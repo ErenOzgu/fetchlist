@@ -119,8 +119,8 @@ or URLs. It does not know what a registry redirects to (layers come from other h
 - **The tool checks itself.** CI runs `fetchlist check . --strict` on this repository. That found a bug before release:
   `fetchlist/dockerfile.py` was being read as a Dockerfile because its name starts with `dockerfile.`.
 - **Real repositories.** The first version was run on the author's own repositories. The false positives it showed
-  (loopback health checks, images built in the same file, a Maven BOM, `${VAR:?message}`) became tests; the true
-  positives are described in the README.
+  (loopback health checks, images built in the same file, a Maven BOM, `${VAR:?message}`, and in 0.1.1 a Compose
+  service that has both `build` and `image`) became tests; the true positives are described in the README.
 
 ## What would be changed next
 

@@ -92,11 +92,33 @@ def _image(file: str, line: int, ref: str, variables: dict[str, str | None]) -> 
     return Fetch(file, line, "image", ref, status, why, "" if has_variable(ref) else parse_image(ref)[0])
 
 
+def _service_builds(lines: list[str], i: int, col: int) -> bool:
+    """True when the mapping that holds line i (a service) also has a `build` key at the same column."""
+
+    def inside(line: str) -> bool:
+        return not line.strip() or line.lstrip().startswith("#") or len(line) - len(line.lstrip(" ")) >= col
+
+    first = i
+    while first > 0 and inside(lines[first - 1]):
+        first -= 1
+    last = i
+    while last + 1 < len(lines) and inside(lines[last + 1]):
+        last += 1
+    for line in lines[first : last + 1]:
+        parsed = parse_key(line)
+        if parsed and parsed[0] == col and parsed[1] == "build":
+            return True
+    return False
+
+
 def scan_compose(text: str, file: str) -> list[Fetch]:
+    """Images named in a Compose file. A service that also has `build` makes its image here: `image` is only the
+    name it is given, so it is not a download (unless the file sets `pull_policy`, which this does not read)."""
+    lines = text.splitlines()
     variables = collect_vars(text, yaml=True)
     out: list[Fetch] = []
-    for number, line in enumerate(text.splitlines(), start=1):
+    for i, line in enumerate(lines):
         parsed = parse_key(line)
-        if parsed and parsed[1] == "image" and parsed[2]:
-            out.append(_image(file, number, unquote(parsed[2]), variables))
+        if parsed and parsed[1] == "image" and parsed[2] and not _service_builds(lines, i, parsed[0]):
+            out.append(_image(file, i + 1, unquote(parsed[2]), variables))
     return out

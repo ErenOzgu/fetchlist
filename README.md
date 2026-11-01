@@ -184,6 +184,35 @@ exceptions.
   followed, files over 2 MB are skipped, and `check` exits 2 when it had to skip something, so a file it could not read
   never turns into a pass.
 
+## On real repositories
+
+I ran it on my other 24 public repositories before changing anything, and again after. Together their workflows,
+Dockerfiles, Compose files and scripts download 281 things.
+
+| | pinned | verified | unpinned | unresolved |
+|---|---:|---:|---:|---:|
+| Before | 16 | 14 | **247** | 4 |
+| After | 261 | 14 | **2** | 4 |
+
+The 247 were 195 actions referenced by a tag, 41 `pip install` lines without a version (mostly `ruff` and `build`),
+10 container images by tag and one tarball downloaded without a checksum. Actions are now pinned to the commit of
+their latest release, packages to an exact version, images to the digest of the tag they used and the tarball to the
+SHA-256 from the release's `sha256sums.txt`. The digests and the checksum were read in a CI run, because the registry
+was not reachable from where I worked; the checksum computed from the download matched the published one. The
+tool only reports. I made the changes with a script, which is why `fetchlist pin` is on the [roadmap](ROADMAP.md).
+CI was green in every repository afterwards. One run failed on the way (the Grafana demo stack of
+`asterisk-exporter`, with the digest of the old Grafana patch release); I did not find the cause, and it passed with the
+next patch release, the change Dependabot proposed in its first pull request.
+
+The two that remain are on purpose: `Django>=6.0,<6.1` in a lab whose point is to run the code against the next Django,
+and the `requirements.txt` of a test fixture that is analysed and never installed. The 14 `verified` are downloads
+whose checksum comes from a file fetched in the same step. The 4 `unresolved` are three URLs whose host is a variable
+that defaults to `localhost`, and one package version that comes from a build matrix.
+
+The run also showed mistakes in the tool, each fixed with a test: loopback URLs, images built in the same file, Maven
+dependencies whose version comes from a BOM, `${VAR:?message}` and, in 0.1.1, images that a Compose file builds itself
+(`build:` next to `image:`).
+
 ## Limits
 
 - **It reads lines, not syntax trees.** CI files are scanned with indentation rules instead of a YAML parser (flow
@@ -201,7 +230,7 @@ exceptions.
 
 ## How it was checked
 
-- 225 tests: every rule above, each scanner on real-looking input, the command line (exit codes, formats, the
+- 228 tests: every rule above, each scanner on real-looking input, the command line (exit codes, formats, the
   configuration), and a mutation of the sample files, 300 per file, that must never crash a scanner and must always
   point at a line that exists.
 - **A mutation check, once and by hand.** 112 single-line changes to the lines that decide a status (the pinning

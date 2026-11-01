@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fetchlist"
-version = "0.1.0"
+version = "0.1.1"
 description = "List what a build downloads from outside the repository (images, actions, URLs, packages), say what is not pinned, and list what an offline mirror or firewall allowlist has to hold."
 readme = "README.md"
 requires-python = ">=3.11"

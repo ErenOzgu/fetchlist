@@ -204,7 +204,7 @@ def test_the_default_root_is_the_current_directory(tmp_path, capsys, monkeypatch
 def test_version_and_usage(capsys):
     with pytest.raises(SystemExit) as exc:
         main(["--version"])
-    assert exc.value.code == 0 and "fetchlist 0.1.0" in capsys.readouterr().out
+    assert exc.value.code == 0 and "fetchlist 0.1.1" in capsys.readouterr().out
     with pytest.raises(SystemExit) as exc:
         main([])
     assert exc.value.code == 2
